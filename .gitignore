@@ -1,0 +1,28 @@
+# Gradle / Kotlin build output
+.gradle/
+.kotlin/
+build/
+/captures
+.externalNativeBuild
+.cxx
+
+# Android Studio / IntelliJ
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/other.xml
+
+# Local machine config and secrets (never commit)
+local.properties
+secrets.properties
+*.jks
+*.keystore
+google-services.json
+
+# macOS
+.DS_Store
