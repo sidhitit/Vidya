@@ -16,6 +16,7 @@ build/
 /.idea/assetWizardSettings.xml
 /.idea/deploymentTargetSelector.xml
 /.idea/other.xml
+/.idea/artifacts
 
 # Local machine config and secrets (never commit)
 local.properties
