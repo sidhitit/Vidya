@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Vidya"
 include(":app")
- 
+include(":shared")
