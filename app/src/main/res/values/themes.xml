@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Vidya" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Vidya" parent="android:Theme.Material.NoActionBar">
+        <!-- Dark window so there's no white flash before Compose draws -->
+        <item name="android:windowBackground">@color/vidya_background</item>
+    </style>
+
+    <!-- Shown while the app starts, then replaced by Theme.Vidya -->
+    <style name="Theme.Vidya.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/vidya_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Vidya</item>
+    </style>
 </resources>
