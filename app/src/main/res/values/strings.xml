@@ -1,6 +1,28 @@
 <resources>
     <string name="app_name">Vidya</string>
 
+    <!-- Login / OTP -->
+    <string name="login_tagline">1000+ Series\nLearn anything, anytime</string>
+    <string name="country_code">+91</string>
+    <string name="mobile_hint">Enter 10-digit Mobile Number</string>
+    <string name="get_otp">Get OTP</string>
+    <string name="legal_agree">By proceeding, you agree to our</string>
+    <string name="terms_of_use">Terms of Use</string>
+    <string name="legal_and">and</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="legal_safe">All your details are 100% safe &amp; secure</string>
+    <string name="otp_sent_to">OTP sent to %1$s.</string>
+    <string name="otp_not_your_number">Not your number?</string>
+    <string name="otp_edit">Edit here.</string>
+    <string name="otp_hint">Enter OTP</string>
+    <string name="login">Login</string>
+    <string name="otp_not_received">Didn\'t receive an OTP?</string>
+    <string name="otp_resend_in">Resend in %1$d Seconds</string>
+    <string name="otp_resend">Resend OTP</string>
+    <string name="otp_resending">Sending…</string>
+    <string name="error_invalid_mobile">Enter a valid 10-digit mobile number</string>
+    <string name="error_invalid_otp">Incorrect OTP. Please try again.</string>
+
     <!-- Bottom bar -->
     <string name="tab_home">Home</string>
     <string name="tab_explore">Explore</string>

@@ -41,7 +41,7 @@ fun PosterCard(
         modifier = modifier
             .clip(shape)
             .background(VidyaColors.Surface)
-            .border(1.dp, VidyaColors.Gold, shape)
+            .border(1.dp, VidyaColors.CardOutline, shape)
             .clickable(onClick = onClick),
     ) {
         AsyncImage(

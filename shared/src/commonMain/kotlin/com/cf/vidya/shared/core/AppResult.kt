@@ -9,6 +9,7 @@ sealed interface AppResult<out T> {
 sealed interface AppError {
     data object Network : AppError
     data object Unauthorized : AppError
+    data object InvalidOtp : AppError
     data class Server(val code: Int) : AppError
     data class Unknown(val message: String? = null) : AppError
 }

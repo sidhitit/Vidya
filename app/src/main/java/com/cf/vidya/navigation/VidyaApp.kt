@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,6 +22,8 @@ import com.cf.vidya.designsystem.components.PlaceholderScreen
 import com.cf.vidya.designsystem.components.VidyaBottomBar
 import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
+import com.cf.vidya.feature.auth.LoginRoute
+import com.cf.vidya.feature.auth.OtpRoute
 import com.cf.vidya.feature.home.HomeRoute
 
 /** App root: the navigation graph plus the floating bottom bar on tab screens. */
@@ -39,9 +40,25 @@ fun VidyaApp(navController: NavHostController = rememberNavController()) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = HomeDestination,
+            // TODO: start at Home when a saved session exists (needs local storage, backend phase).
+            startDestination = LoginDestination,
             modifier = Modifier.fillMaxSize(),
         ) {
+            composable<LoginDestination> {
+                LoginRoute(onOpenOtp = { navController.navigate(OtpDestination(it)) })
+            }
+            composable<OtpDestination> { entry ->
+                OtpRoute(
+                    mobile = entry.toRoute<OtpDestination>().mobile,
+                    onLoggedIn = {
+                        navController.navigate(HomeDestination) {
+                            // Remove Login and OTP so Back from Home closes the app instead of returning here.
+                            popUpTo<LoginDestination> { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                )
+            }
             composable<HomeDestination> {
                 HomeRoute(
                     onOpenSeries = { navController.navigate(SeriesDestination(it)) },
@@ -78,8 +95,9 @@ fun VidyaApp(navController: NavHostController = rememberNavController()) {
 
 private fun NavHostController.navigateToTab(tab: TopLevelDestination) {
     navigate(tab.route) {
-        // Keep one copy of each tab and remember its scroll position
-        popUpTo(graph.findStartDestination().id) { saveState = true }
+        // Keep one copy of each tab and remember its scroll position.
+        // Home is the root of the tabs (Login is removed from the back stack after sign-in).
+        popUpTo<HomeDestination> { saveState = true }
         launchSingleTop = true
         restoreState = true
     }

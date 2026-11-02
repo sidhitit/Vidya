@@ -15,6 +15,8 @@ object VidyaColors {
     val Surface = Color(0xFF1B1B1B)
     val SurfaceElevated = Color(0xFF262626)
     val Outline = Color(0xFF3A3A3A)
+    /** Thin light-grey border around poster cards. */
+    val CardOutline = Color(0xFF9E9E9E)
 
     val Gold = Color(0xFFEFC870)
     val OnGold = Color(0xFF1A1A1A)

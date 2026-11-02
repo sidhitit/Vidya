@@ -42,6 +42,7 @@ import com.cf.vidya.designsystem.components.VidyaTopBar
 import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
 import com.cf.vidya.designsystem.theme.VidyaTheme
+import com.cf.vidya.feature.common.messageRes
 import com.cf.vidya.shared.core.AppError
 import com.cf.vidya.shared.domain.model.ContinueWatching
 import com.cf.vidya.shared.domain.model.Series
@@ -236,11 +237,6 @@ private fun HomeSkeleton() {
             repeat(3) { SkeletonBox(modifier = Modifier.size(width = 120.dp, height = 156.dp)) }
         }
     }
-}
-
-private fun AppError.messageRes(): Int = when (this) {
-    AppError.Network -> R.string.error_network
-    else -> R.string.error_generic
 }
 
 // region Previews

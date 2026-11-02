@@ -9,6 +9,8 @@ import kotlinx.serialization.Serializable
 
 // Type-safe routes: a missing or wrong argument is a compile error, not a runtime crash.
 
+@Serializable data object LoginDestination
+@Serializable data class OtpDestination(val mobile: String)
 @Serializable data object HomeDestination
 @Serializable data object ExploreDestination
 @Serializable data object LibraryDestination
