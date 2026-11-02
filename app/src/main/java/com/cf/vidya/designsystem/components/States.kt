@@ -1,5 +1,6 @@
 package com.cf.vidya.designsystem.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,6 +76,50 @@ fun ErrorState(
             onClick = onRetry,
             modifier = Modifier.width(160.dp),
         )
+    }
+}
+
+/** Shown when a list has nothing in it yet, with an optional button that leads somewhere useful. */
+@Composable
+fun EmptyState(
+    @DrawableRes icon: Int,
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+    actionText: String? = null,
+    onAction: () -> Unit = {},
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(VidyaSpacing.xl),
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = VidyaColors.TextTertiary,
+            modifier = Modifier.size(56.dp),
+        )
+        Spacer(Modifier.height(VidyaSpacing.l))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = VidyaColors.TextPrimary,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(VidyaSpacing.s))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = VidyaColors.TextSecondary,
+            textAlign = TextAlign.Center,
+        )
+        if (actionText != null) {
+            Spacer(Modifier.height(VidyaSpacing.xl))
+            GoldButton(text = actionText, onClick = onAction, modifier = Modifier.width(200.dp))
+        }
     }
 }
 

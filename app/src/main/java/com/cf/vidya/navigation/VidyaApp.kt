@@ -25,6 +25,7 @@ import com.cf.vidya.designsystem.theme.VidyaSpacing
 import com.cf.vidya.feature.auth.LoginRoute
 import com.cf.vidya.feature.auth.OtpRoute
 import com.cf.vidya.feature.home.HomeRoute
+import com.cf.vidya.feature.library.LibraryRoute
 
 /** App root: the navigation graph plus the floating bottom bar on tab screens. */
 @Composable
@@ -67,7 +68,12 @@ fun VidyaApp(navController: NavHostController = rememberNavController()) {
                 )
             }
             composable<ExploreDestination> { PlaceholderScreen(stringResource(R.string.tab_explore)) }
-            composable<LibraryDestination> { PlaceholderScreen(stringResource(R.string.tab_library)) }
+            composable<LibraryDestination> {
+                LibraryRoute(
+                    onOpenSeries = { navController.navigate(SeriesDestination(it)) },
+                    onOpenExplore = { navController.navigateToTab(TopLevelDestination.EXPLORE) },
+                )
+            }
             composable<PremiumDestination> { PlaceholderScreen(stringResource(R.string.tab_premium)) }
             composable<ProfileDestination> { PlaceholderScreen(stringResource(R.string.profile)) }
             composable<SearchDestination> { PlaceholderScreen(stringResource(R.string.search)) }
