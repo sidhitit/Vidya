@@ -31,7 +31,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -139,6 +141,7 @@ private fun LiquidIndicator(selectedIndex: Int, gold: Boolean, modifier: Modifie
 
 @Composable
 private fun BottomBarTab(item: BottomBarItem, selected: Boolean, onClick: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
     val color by animateColorAsState(
         targetValue = when {
             item.highlighted -> VidyaColors.Gold
@@ -157,7 +160,15 @@ private fun BottomBarTab(item: BottomBarItem, selected: Boolean, onClick: () -> 
         modifier = Modifier
             .width(ItemWidth)
             .clip(CircleShape)
-            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .selectable(
+                selected = selected,
+                role = Role.Tab,
+                onClick = {
+                    // A short, crisp click under the finger on every tab tap.
+                    haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    onClick()
+                },
+            )
             .padding(vertical = 6.dp),
     ) {
         Icon(

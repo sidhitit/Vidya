@@ -1,8 +1,13 @@
 package com.cf.vidya.feature.home
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,21 +30,44 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.cf.vidya.R
 import com.cf.vidya.designsystem.components.ErrorState
 import com.cf.vidya.designsystem.components.PosterCard
 import com.cf.vidya.designsystem.components.SectionTitle
 import com.cf.vidya.designsystem.components.SkeletonBox
 import com.cf.vidya.designsystem.components.VidyaTopBar
+import com.cf.vidya.designsystem.motion.TiltState
+import com.cf.vidya.designsystem.motion.rememberTiltState
 import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
 import com.cf.vidya.designsystem.theme.VidyaTheme
@@ -50,6 +78,7 @@ import com.cf.vidya.shared.domain.model.Series
 import com.cf.vidya.shared.presentation.home.HomeEvent
 import com.cf.vidya.shared.presentation.home.HomeState
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.flow.drop
 
 /** Stateless Home UI: draws [state] and reports user actions through [onEvent]. */
 @Composable
@@ -104,39 +133,232 @@ private fun HomeContent(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     }
 }
 
+/** Height of the centred poster; the page is taller so its shadow has room. */
+private val HeroCardHeight = 320.dp
+
 @Composable
 private fun HeroCarousel(series: List<Series>, onSeriesClick: (String) -> Unit) {
     val pagerState = rememberPagerState(pageCount = { series.size })
-    Column {
-        HorizontalPager(
-            state = pagerState,
-            contentPadding = PaddingValues(horizontal = 56.dp),
-            pageSpacing = VidyaSpacing.m,
-            key = { series[it].id },
-        ) { page ->
-            val item = series[page]
-            PosterCard(
-                posterUrl = item.posterUrl,
-                contentDescription = item.title,
-                viewCount = item.viewCount,
-                onClick = { onSeriesClick(item.id) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(320.dp)
-                    .graphicsLayer {
-                        // Side cards shrink slightly, like the design
-                        val offset = pagerState.offsetFor(page).coerceIn(0f, 1f)
-                        scaleY = lerp(1f, 0.88f, offset)
-                    },
-            )
+    val haptics = LocalHapticFeedback.current
+    val tilt = rememberTiltState()
+
+    // A light tick each time a new card takes the centre, like a dial clicking into place.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .drop(1) // not for the first page shown
+            .collect { haptics.performHapticFeedback(HapticFeedbackType.SegmentTick) }
+    }
+
+    Box {
+        AmbientGlow(series = series, pagerState = pagerState, tilt = tilt, modifier = Modifier.matchParentSize())
+        Column {
+            HorizontalPager(
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = 56.dp),
+                pageSpacing = VidyaSpacing.m,
+                key = { series[it].id },
+            ) { page ->
+                HeroCard(
+                    series = series[page],
+                    pagerState = pagerState,
+                    page = page,
+                    tilt = tilt,
+                    onClick = { onSeriesClick(series[page].id) },
+                )
+            }
+            PagerDots(count = series.size, current = pagerState.currentPage)
+            Spacer(Modifier.height(VidyaSpacing.s))
         }
-        Spacer(Modifier.height(VidyaSpacing.m))
-        PagerDots(count = series.size, current = pagerState.currentPage)
     }
 }
 
-private fun PagerState.offsetFor(page: Int): Float =
-    ((currentPage - page) + currentPageOffsetFraction).absoluteValue
+/** How blurred a card is when it's a full card away from the centre. */
+private val MaxCardBlur = 14.dp
+
+// Tilt parallax: layers move by different amounts when the phone tilts, which reads as depth.
+/** How far the centred card turns towards the tilt. */
+private const val TiltCardDegrees = 5f
+/** How far the backlight behind the card slides (opposite way to the card). */
+private val TiltLightShift = 18.dp
+/** How far the blurred glow behind the whole carousel slides — the deepest layer moves most. */
+private val TiltGlowShift = 24.dp
+
+@Composable
+private fun HeroCard(
+    series: Series,
+    pagerState: PagerState,
+    page: Int,
+    tilt: TiltState,
+    onClick: () -> Unit,
+) {
+    // "Pop": the card sinks a little while your finger is on it and springs back on release.
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val pressScale by animateFloatAsState(
+        targetValue = if (pressed) 0.95f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "pressScale",
+    )
+    val shape = MaterialTheme.shapes.medium
+
+    // All effects below are read inside graphicsLayer/drawBehind, so they update every frame
+    // of the swipe without recomposing the card.
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = VidyaSpacing.l)
+            .graphicsLayer {
+                // -1 = one card to the left of centre, 0 = centred, 1 = one card to the right.
+                val offset = pagerState.signedOffsetFor(page).coerceIn(-1f, 1f)
+                val distance = offset.absoluteValue
+                // Side cards turn towards the centre, shrink and fade, so the centred one stands out.
+                // The centred card also turns slightly with the phone's tilt; side cards stay still.
+                val focus = 1f - distance
+                rotationY = offset * 18f + tilt.x * TiltCardDegrees * focus
+                rotationX = -tilt.y * TiltCardDegrees * focus
+                cameraDistance = 12f * density
+                val scale = lerp(1f, 0.82f, distance) * pressScale
+                scaleX = scale
+                scaleY = scale
+                alpha = lerp(1f, 0.6f, distance)
+            },
+    ) {
+        // Light behind the centred card: a warm spotlight that makes it look lit from behind.
+        // Fades out as the card moves away from the centre.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .drawBehind {
+                    val focus = 1f - pagerState.signedOffsetFor(page).absoluteValue.coerceIn(0f, 1f)
+                    if (focus <= 0f) return@drawBehind
+                    // The light sits "behind" the card, so it slides the opposite way to the tilt.
+                    val lightCenter = center - Offset(tilt.x, tilt.y) * (TiltLightShift.toPx() * focus)
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(VidyaColors.Gold.copy(alpha = 0.32f * focus), Color.Transparent),
+                            center = lightCenter,
+                            radius = size.maxDimension * 0.75f,
+                        ),
+                        radius = size.maxDimension * 0.75f,
+                        center = lightCenter,
+                    )
+                },
+        )
+        Box(
+            modifier = Modifier.graphicsLayer {
+                // Blur grows with the distance from the centre: the card you swipe away
+                // blurs out while the incoming one comes into focus. (Android 12+.)
+                val distance = pagerState.signedOffsetFor(page).absoluteValue.coerceIn(0f, 1f)
+                val radius = MaxCardBlur.toPx() * distance
+                renderEffect = if (radius > 0.5f) BlurEffect(radius, radius, TileMode.Decal) else null
+            },
+        ) {
+            val distance = pagerState.signedOffsetFor(page).absoluteValue.coerceIn(0f, 1f)
+            PosterCard(
+                posterUrl = series.posterUrl,
+                contentDescription = series.title,
+                viewCount = series.viewCount,
+                onClick = onClick,
+                interactionSource = interactionSource,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(HeroCardHeight)
+                    // Deep shadow with a gold tint under the centred card; flattens as it moves aside.
+                    .shadow(
+                        elevation = lerp(28.dp, 4.dp, distance),
+                        shape = shape,
+                        ambientColor = Color.Black,
+                        spotColor = VidyaColors.Gold,
+                    ),
+            )
+            // Sheen: a soft diagonal highlight across the top of the centred card, like light on glass.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(shape)
+                    .drawBehind {
+                        val focus = 1f - pagerState.signedOffsetFor(page).absoluteValue.coerceIn(0f, 1f)
+                        // The highlight glides across the card as you tilt, like light moving on glass.
+                        val glide = Offset(tilt.x * size.width, tilt.y * size.height) * (0.4f * focus)
+                        drawRect(
+                            Brush.linearGradient(
+                                0f to Color.White.copy(alpha = 0.18f * focus),
+                                0.35f to Color.Transparent,
+                                start = glide,
+                                end = Offset(size.width, size.height) + glide,
+                            ),
+                        )
+                    },
+            )
+        }
+    }
+}
+
+/**
+ * The colours of the centred poster, blurred into a soft glow behind the carousel.
+ * Neighbouring posters cross-fade in as you swipe.
+ */
+@Composable
+private fun AmbientGlow(
+    series: List<Series>,
+    pagerState: PagerState,
+    tilt: TiltState,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    // Clipped so the enlarged, drifting glow never spills over the top bar.
+    Box(modifier = modifier.clipToBounds()) {
+        // The deepest layer: drifts furthest against the tilt. Slightly enlarged so its edges never show.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer {
+                    translationX = -tilt.x * TiltGlowShift.toPx()
+                    translationY = -tilt.y * TiltGlowShift.toPx()
+                    scaleX = 1.15f
+                    scaleY = 1.15f
+                },
+        ) {
+            series.forEachIndexed { index, item ->
+                // Only the centred card and its neighbours can be visible; skip the rest.
+                if ((index - pagerState.currentPage).absoluteValue > 1) return@forEachIndexed
+                AsyncImage(
+                    // A tiny 12×18 image stretched to fill the area looks blurry on every Android version,
+                    // and costs almost nothing to load.
+                    model = remember(item.posterUrl) {
+                        ImageRequest.Builder(context).data(item.posterUrl).size(12, 18).build()
+                    },
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = (1f - pagerState.signedOffsetFor(index).absoluteValue).coerceIn(0f, 1f) * 0.7f
+                        }
+                        // Extra smoothing on Android 12+; ignored on older versions.
+                        .blur(32.dp, BlurredEdgeTreatment.Rectangle),
+                )
+            }
+        }
+        // Fades the glow into the page at the top and bottom edges.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        0f to VidyaColors.Background,
+                        0.25f to VidyaColors.Background.copy(alpha = 0.35f),
+                        0.7f to VidyaColors.Background.copy(alpha = 0.5f),
+                        1f to VidyaColors.Background,
+                    ),
+                ),
+        )
+    }
+}
+
+/** How far [page] is from the centre: negative to the left, positive to the right. */
+private fun PagerState.signedOffsetFor(page: Int): Float =
+    (page - currentPage) - currentPageOffsetFraction
 
 @Composable
 private fun PagerDots(count: Int, current: Int) {

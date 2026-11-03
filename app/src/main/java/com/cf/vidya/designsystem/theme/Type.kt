@@ -2,15 +2,31 @@ package com.cf.vidya.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.cf.vidya.R
 
 /**
- * The design looks like Open Sans. Until the font files arrive this uses the system font;
- * swap [VidyaFontFamily] for the bundled font then.
+ * Lexend, the font Seekho uses (free Google Font, SIL Open Font License — see licenses/Lexend-OFL.txt).
+ *
+ * res/font/lexend.ttf is a variable font: one file that contains every weight. Each entry below
+ * picks a weight from it. Android 8+ draws the exact weight; Android 7 shows them all as Regular.
  */
-val VidyaFontFamily: FontFamily = FontFamily.Default
+private fun lexend(weight: FontWeight) = Font(
+    resId = R.font.lexend,
+    weight = weight,
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
+)
+
+val VidyaFontFamily = FontFamily(
+    lexend(FontWeight.Normal),
+    lexend(FontWeight.Medium),
+    lexend(FontWeight.SemiBold),
+    lexend(FontWeight.Bold),
+)
 
 val VidyaTypography = Typography(
     headlineSmall = TextStyle(
