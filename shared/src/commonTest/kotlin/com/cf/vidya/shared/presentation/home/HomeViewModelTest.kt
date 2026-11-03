@@ -81,5 +81,6 @@ class HomeViewModelTest {
     /** Returns the given results in order, one per call. */
     private class QueueRepository(private val results: MutableList<AppResult<HomeFeed>>) : SeriesRepository {
         override suspend fun getHomeFeed(): AppResult<HomeFeed> = results.removeAt(0)
+        override suspend fun getContinueWatching(): AppResult<List<ContinueWatching>> = error("Not used")
     }
 }

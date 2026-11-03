@@ -24,8 +24,10 @@ import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
 import com.cf.vidya.feature.auth.LoginRoute
 import com.cf.vidya.feature.auth.OtpRoute
+import com.cf.vidya.feature.explore.ExploreRoute
 import com.cf.vidya.feature.home.HomeRoute
 import com.cf.vidya.feature.library.LibraryRoute
+import com.cf.vidya.feature.profile.ProfileRoute
 
 /** App root: the navigation graph plus the floating bottom bar on tab screens. */
 @Composable
@@ -67,7 +69,9 @@ fun VidyaApp(navController: NavHostController = rememberNavController()) {
                     onOpenProfile = { navController.navigate(ProfileDestination) },
                 )
             }
-            composable<ExploreDestination> { PlaceholderScreen(stringResource(R.string.tab_explore)) }
+            composable<ExploreDestination> {
+                ExploreRoute(onOpenSeries = { navController.navigate(SeriesDestination(it)) })
+            }
             composable<LibraryDestination> {
                 LibraryRoute(
                     onOpenSeries = { navController.navigate(SeriesDestination(it)) },
@@ -75,7 +79,13 @@ fun VidyaApp(navController: NavHostController = rememberNavController()) {
                 )
             }
             composable<PremiumDestination> { PlaceholderScreen(stringResource(R.string.tab_premium)) }
-            composable<ProfileDestination> { PlaceholderScreen(stringResource(R.string.profile)) }
+            composable<ProfileDestination> {
+                ProfileRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenSeries = { navController.navigate(SeriesDestination(it)) },
+                    onOpenPremium = { navController.navigateToTab(TopLevelDestination.PREMIUM) },
+                )
+            }
             composable<SearchDestination> { PlaceholderScreen(stringResource(R.string.search)) }
             composable<SeriesDestination> { entry ->
                 val route = entry.toRoute<SeriesDestination>()

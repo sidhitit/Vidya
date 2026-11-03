@@ -17,9 +17,18 @@ class LibraryViewModel(
 
     override fun onEvent(event: LibraryEvent) {
         when (event) {
+            LibraryEvent.ScreenShown -> refresh()
             LibraryEvent.RetryClicked -> load()
             LibraryEvent.ExploreClicked -> sendEffect(LibraryEffect.OpenExplore)
             is LibraryEvent.SeriesClicked -> sendEffect(LibraryEffect.OpenSeries(event.seriesId))
+        }
+    }
+
+    /** Reloads without the skeleton, so the grid doesn't flash. Skipped while the first load runs. */
+    private fun refresh() {
+        if (currentState.isLoading) return
+        viewModelScope.launch {
+            getSavedSeries().onSuccess { setState { copy(series = it, error = null) } }
         }
     }
 

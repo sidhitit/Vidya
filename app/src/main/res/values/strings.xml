@@ -42,6 +42,32 @@
     <string name="library_empty_message">Save a series and it will show up here, so you can watch it any time.</string>
     <string name="library_empty_action">Explore series</string>
 
+    <!-- Profile -->
+    <string name="user_id">ID : %1$s</string>
+    <string name="copy_id">Copy ID</string>
+    <string name="id_copied">ID copied</string>
+    <string name="premium_plan">Premium Plan</string>
+    <string name="free_plan">Free Plan</string>
+    <string name="premium_benefits">Premium Benefits</string>
+    <string name="benefit_unlimited">Unlimited\nAccess</string>
+    <string name="benefit_ads_free">Ads Free</string>
+    <string name="benefit_hd">HD Video\nQuality</string>
+    <string name="benefit_logins">Multiple\nLogins</string>
+    <string name="get_premium">Get Premium</string>
+    <string name="manage_subscription">Manage Subscription</string>
+
+    <!-- Explore -->
+    <string name="like">Like</string>
+    <string name="save">Save</string>
+    <string name="share">Share</string>
+    <string name="watch_now">Watch Now</string>
+    <string name="play">Play</string>
+    <string name="share_series_text">Watch “%1$s” on Vidya</string>
+    <plurals name="episode_count">
+        <item quantity="one">%d Episode</item>
+        <item quantity="other">%d Episodes</item>
+    </plurals>
+
     <!-- Common -->
     <string name="retry">Retry</string>
     <string name="back">Back</string>

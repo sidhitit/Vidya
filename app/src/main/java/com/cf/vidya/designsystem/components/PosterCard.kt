@@ -6,7 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,7 +31,10 @@ import com.cf.vidya.R
 import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
 
-/** Rounded series poster with the "👁 750K" view-count badge, used across Home, Library, Profile. */
+/**
+ * Rounded series poster with the "👁 750K" view-count badge, used across Home, Library, Profile.
+ * Pass [progress] (0 to 1) to show how much has been watched as a gold bar along the bottom.
+ */
 @Composable
 fun PosterCard(
     posterUrl: String,
@@ -35,6 +42,7 @@ fun PosterCard(
     viewCount: Long,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    progress: Float? = null,
 ) {
     val shape = MaterialTheme.shapes.medium
     Box(
@@ -55,6 +63,31 @@ fun PosterCard(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(VidyaSpacing.s),
+        )
+        if (progress != null) {
+            WatchProgressBar(
+                progress = progress,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
+}
+
+/** Thin bar: a dark track across the full width, filled in gold up to [progress]. */
+@Composable
+private fun WatchProgressBar(progress: Float, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(5.dp)
+            // Dark track stays visible on bright posters too.
+            .background(Color.Black.copy(alpha = 0.6f)),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                .fillMaxHeight()
+                .background(VidyaColors.Gold),
         )
     }
 }

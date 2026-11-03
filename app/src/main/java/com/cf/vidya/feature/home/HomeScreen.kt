@@ -37,6 +37,7 @@ import androidx.compose.ui.util.lerp
 import com.cf.vidya.R
 import com.cf.vidya.designsystem.components.ErrorState
 import com.cf.vidya.designsystem.components.PosterCard
+import com.cf.vidya.designsystem.components.SectionTitle
 import com.cf.vidya.designsystem.components.SkeletonBox
 import com.cf.vidya.designsystem.components.VidyaTopBar
 import com.cf.vidya.designsystem.theme.VidyaColors
@@ -184,6 +185,7 @@ private fun ContinueWatchingCard(item: ContinueWatching, onClick: () -> Unit) {
             contentDescription = item.series.title,
             viewCount = item.series.viewCount,
             onClick = onClick,
+            progress = item.progress,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(156.dp),
@@ -202,16 +204,6 @@ private fun ContinueWatchingCard(item: ContinueWatching, onClick: () -> Unit) {
             color = VidyaColors.TextSecondary,
         )
     }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium,
-        color = VidyaColors.TextPrimary,
-        modifier = Modifier.padding(horizontal = VidyaSpacing.l, vertical = VidyaSpacing.s),
-    )
 }
 
 @Composable

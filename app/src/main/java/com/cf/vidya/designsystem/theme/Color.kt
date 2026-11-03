@@ -31,6 +31,7 @@ object VidyaColors {
     val Error = Color(0xFFFF6B6B)
     val Scrim = Color(0x99000000)
 
+    val PremiumCardOutline = Color(0xFF6E3434)
     val PremiumCard = Brush.linearGradient(listOf(Color(0xFF5C1717), Color(0xFF2A0B0B)))
     val LogoGradient = Brush.linearGradient(listOf(Color(0xFF6A2BD9), Color(0xFF2A0F6B)))
 }

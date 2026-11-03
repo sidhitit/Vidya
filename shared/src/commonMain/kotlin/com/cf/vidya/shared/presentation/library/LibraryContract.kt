@@ -12,6 +12,8 @@ data class LibraryState(
 }
 
 sealed interface LibraryEvent {
+    /** The tab became visible; picks up series saved elsewhere (e.g. from Explore). */
+    data object ScreenShown : LibraryEvent
     data object RetryClicked : LibraryEvent
     data object ExploreClicked : LibraryEvent
     data class SeriesClicked(val seriesId: String) : LibraryEvent

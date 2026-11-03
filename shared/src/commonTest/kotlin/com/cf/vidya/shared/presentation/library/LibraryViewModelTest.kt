@@ -67,6 +67,19 @@ class LibraryViewModelTest {
     }
 
     @Test
+    fun screenShownRefreshesWithoutSkeleton() = runTest {
+        val updated = saved + Series("s2", "Stock Market Basics", "", 540_000, 12, isPremium = true)
+        val vm = viewModel(AppResult.Success(saved), AppResult.Success(updated))
+        vm.onEvent(LibraryEvent.ScreenShown) // ignored: first load still running
+        advanceUntilIdle()
+
+        vm.onEvent(LibraryEvent.ScreenShown)
+        assertFalse(vm.state.value.isLoading)
+        advanceUntilIdle()
+        assertEquals(updated, vm.state.value.series)
+    }
+
+    @Test
     fun clicksBecomeEffects() = runTest {
         val vm = viewModel(AppResult.Success(saved))
         vm.effects.test {
@@ -80,5 +93,6 @@ class LibraryViewModelTest {
     /** Returns the given results in order, one per call. */
     private class QueueRepository(private val results: MutableList<AppResult<List<Series>>>) : LibraryRepository {
         override suspend fun getSavedSeries(): AppResult<List<Series>> = results.removeAt(0)
+        override suspend fun setSaved(series: Series, saved: Boolean): AppResult<Unit> = error("Not used")
     }
 }

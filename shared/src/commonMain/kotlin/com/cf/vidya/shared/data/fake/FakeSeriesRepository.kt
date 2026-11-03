@@ -11,14 +11,17 @@ class FakeSeriesRepository : SeriesRepository {
 
     override suspend fun getHomeFeed(): AppResult<HomeFeed> {
         delay(800) // so loading states are visible
-        val series = SampleData.series
         return AppResult.Success(
-            HomeFeed(
-                featured = series.take(5),
-                continueWatching = series.drop(2).mapIndexed { index, item ->
-                    ContinueWatching(item, lastEpisodeNumber = (index * 3 + 2).coerceAtMost(item.totalEpisodes))
-                },
-            ),
+            HomeFeed(featured = SampleData.series.take(5), continueWatching = continueWatching()),
         )
+    }
+
+    override suspend fun getContinueWatching(): AppResult<List<ContinueWatching>> {
+        delay(800)
+        return AppResult.Success(continueWatching())
+    }
+
+    private fun continueWatching() = SampleData.series.drop(2).mapIndexed { index, item ->
+        ContinueWatching(item, lastEpisodeNumber = (index * 3 + 2).coerceAtMost(item.totalEpisodes))
     }
 }
