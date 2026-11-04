@@ -16,6 +16,8 @@ import kotlinx.serialization.Serializable
 @Serializable data object LibraryDestination
 @Serializable data object PremiumDestination
 @Serializable data object ProfileDestination
+@Serializable data object SettingsDestination
+@Serializable data object ManageSubscriptionDestination
 @Serializable data object SearchDestination
 @Serializable data class SeriesDestination(val seriesId: String)
 

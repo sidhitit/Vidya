@@ -1,5 +1,6 @@
 package com.cf.vidya.designsystem.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -74,23 +76,15 @@ fun VidyaTopBar(
     }
 }
 
-/** Placeholder until the designer exports the real logo asset. */
+/** The Vidya app icon, small, for the top of Home. */
 @Composable
 fun VidyaLogo(modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .size(36.dp)
-            .clip(MaterialTheme.shapes.small)
-            .background(VidyaColors.LogoGradient),
-    ) {
-        Text(
-            text = "V",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = VidyaColors.Gold,
-        )
-    }
+    Image(
+        painter = painterResource(R.drawable.vidya_app_icon),
+        contentDescription = stringResource(R.string.app_name),
+        contentScale = ContentScale.Fit,
+        modifier = modifier.size(36.dp),
+    )
 }
 
 @Preview

@@ -19,6 +19,7 @@ class ProfileViewModel(
         when (event) {
             ProfileEvent.RetryClicked -> load()
             ProfileEvent.BackClicked -> sendEffect(ProfileEffect.GoBack)
+            ProfileEvent.SettingsClicked -> sendEffect(ProfileEffect.OpenSettings)
             ProfileEvent.CopyIdClicked -> currentState.overview?.let {
                 sendEffect(ProfileEffect.CopyToClipboard(it.profile.id))
             }

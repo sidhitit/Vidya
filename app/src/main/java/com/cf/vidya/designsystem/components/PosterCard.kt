@@ -27,11 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.cf.vidya.R
 import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
+import com.cf.vidya.designsystem.theme.VidyaTheme
 
 /**
  * Rounded series poster with the "👁 750K" view-count badge, used across Home, Library, Profile.
@@ -129,3 +131,36 @@ fun Long.toCompactCount(): String = when {
 
 // Receives a value in tenths (e.g. 12 → "1.2", 7500 → "750").
 private fun Long.toOneDecimal(): String = if (this % 10 == 0L) "${this / 10}" else "${this / 10}.${this % 10}"
+
+@Preview
+@Composable
+private fun PosterCardPreview() {
+    VidyaTheme {
+        PosterCard(
+            posterUrl = "https://picsum.photos/seed/vidya-1/400/600",
+            contentDescription = "Poster description",
+            viewCount = 750000L,
+            onClick = {},
+            modifier = Modifier
+                .width(120.dp)
+                .height(160.dp),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PosterCardWithProgressPreview() {
+    VidyaTheme {
+        PosterCard(
+            posterUrl = "https://picsum.photos/seed/vidya-1/400/600",
+            contentDescription = "Poster description",
+            viewCount = 1200000L,
+            progress = 0.65f,
+            onClick = {},
+            modifier = Modifier
+                .width(120.dp)
+                .height(160.dp),
+        )
+    }
+}

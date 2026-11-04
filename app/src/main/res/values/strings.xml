@@ -76,4 +76,39 @@
     <string name="coming_soon">Design coming soon</string>
     <string name="series">Series</string>
     <string name="search">Search</string>
+
+    <!-- Premium tab -->
+    <string name="start_trial_title">START YOUR TRIAL NOW</string>
+    <string name="trial_original_price">At ₹%1$d</string>
+    <string name="price_rupees">₹%1$d</string>
+    <plurals name="trial_terms">
+        <item quantity="one">For %1$d day, then ₹%2$d/%3$d months. Cancel anytime.</item>
+        <item quantity="other">For %1$d days, then ₹%2$d/%3$d months. Cancel anytime.</item>
+    </plurals>
+    <string name="get_these_benefits">Get these benefits</string>
+    <string name="trial_benefit_series">%1$d+ Learning Series</string>
+    <string name="trial_benefit_ads_free">Ads Free Videos</string>
+    <string name="trial_benefit_hd">Premium HD Series</string>
+    <string name="trial_note">Note: Your subscription will auto renew every %1$d months. You can cancel your autopay mandate anytime by going to Subscription Settings in profile.</string>
+    <string name="start_trial">Start Trial</string>
+    <string name="trial_started">Your Premium trial has started</string>
+
+    <!-- Settings and Manage Subscription -->
+    <string name="settings">Settings</string>
+    <string name="share_the_app">Share the app</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="log_out">Log Out</string>
+    <string name="log_out_title">Log out of Vidya?</string>
+    <string name="log_out_message">You will need your mobile number and an OTP to log in again.</string>
+    <string name="cancel">Cancel</string>
+    <string name="share_app_message">Learn anything, anytime on Vidya: %1$s</string>
+    <string name="support_email_subject">Vidya support</string>
+    <string name="no_app_to_open">No app found to open this</string>
+    <string name="cancel_subscription">Cancel subscription</string>
+    <string name="transaction_history">Transaction history</string>
+    <string name="please_note">Please Note:</string>
+    <string name="subscription_note_manage">You can manage or cancel your subscription at any time.</string>
+    <string name="subscription_note_play">If you subscribed through Google Play, you can cancel your subscription from your Google Play account under Payments &amp; Subscriptions.</string>
+    <string name="subscription_note_active">Cancelled subscriptions remain active until the end of the billing period.</string>
 </resources>

@@ -18,6 +18,11 @@ class FakeAuthRepository : AuthRepository {
         return if (otp == VALID_OTP) AppResult.Success(Unit) else AppResult.Failure(AppError.InvalidOtp)
     }
 
+    override suspend fun logout(): AppResult<Unit> {
+        delay(500)
+        return AppResult.Success(Unit)
+    }
+
     companion object {
         const val VALID_OTP = "123456"
     }

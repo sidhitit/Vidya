@@ -1,12 +1,16 @@
 package com.cf.vidya.feature.home
 
+import android.provider.Settings
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +64,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.cf.vidya.R
@@ -78,6 +87,7 @@ import com.cf.vidya.shared.domain.model.Series
 import com.cf.vidya.shared.presentation.home.HomeEvent
 import com.cf.vidya.shared.presentation.home.HomeState
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 
 /** Stateless Home UI: draws [state] and reports user actions through [onEvent]. */
@@ -136,17 +146,53 @@ private fun HomeContent(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 /** Height of the centred poster; the page is taller so its shadow has room. */
 private val HeroCardHeight = 320.dp
 
+/** How long each card stays in the centre before the carousel moves on by itself. */
+private const val AutoSlideIntervalMs = 4_000L
+
+/** Slower and smoother than a fling, so the auto-slide feels calm rather than jumpy. */
+private val AutoSlideSpec = tween<Float>(durationMillis = 700, easing = FastOutSlowInEasing)
+
 @Composable
 private fun HeroCarousel(series: List<Series>, onSeriesClick: (String) -> Unit) {
     val pagerState = rememberPagerState(pageCount = { series.size })
     val haptics = LocalHapticFeedback.current
     val tilt = rememberTiltState()
+    val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+    var isAutoSliding by remember { mutableStateOf(false) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val context = LocalContext.current
+    // Respect "Remove animations" in the phone's accessibility settings.
+    val animationsEnabled = remember {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    }
 
-    // A light tick each time a new card takes the centre, like a dial clicking into place.
+    // A light tick each time the user swipes a new card into the centre, like a dial clicking into place.
+    // Not for auto-slides: a buzz every few seconds without touching the phone would be annoying.
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .drop(1) // not for the first page shown
-            .collect { haptics.performHapticFeedback(HapticFeedbackType.SegmentTick) }
+            .collect { if (!isAutoSliding) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick) }
+    }
+
+    // Moves on to the next card every few seconds, and back to the first after the last.
+    // A swipe restarts the wait (this effect restarts when isDragged changes),
+    // and it stops while the app is in the background.
+    LaunchedEffect(pagerState, isDragged, series.size) {
+        if (isDragged || series.size < 2 || !animationsEnabled) return@LaunchedEffect
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                delay(AutoSlideIntervalMs)
+                isAutoSliding = true
+                try {
+                    pagerState.animateScrollToPage(
+                        page = (pagerState.currentPage + 1) % series.size,
+                        animationSpec = AutoSlideSpec,
+                    )
+                } finally {
+                    isAutoSliding = false
+                }
+            }
+        }
     }
 
     Box {

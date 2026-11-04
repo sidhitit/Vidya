@@ -27,7 +27,10 @@ import com.cf.vidya.feature.auth.OtpRoute
 import com.cf.vidya.feature.explore.ExploreRoute
 import com.cf.vidya.feature.home.HomeRoute
 import com.cf.vidya.feature.library.LibraryRoute
+import com.cf.vidya.feature.premium.PremiumRoute
 import com.cf.vidya.feature.profile.ProfileRoute
+import com.cf.vidya.feature.settings.ManageSubscriptionRoute
+import com.cf.vidya.feature.settings.SettingsRoute
 
 /** App root: the navigation graph plus the floating bottom bar on tab screens. */
 @Composable
@@ -78,13 +81,29 @@ fun VidyaApp(navController: NavHostController = rememberNavController()) {
                     onOpenExplore = { navController.navigateToTab(TopLevelDestination.EXPLORE) },
                 )
             }
-            composable<PremiumDestination> { PlaceholderScreen(stringResource(R.string.tab_premium)) }
+            composable<PremiumDestination> { PremiumRoute() }
             composable<ProfileDestination> {
                 ProfileRoute(
                     onBack = { navController.popBackStack() },
                     onOpenSeries = { navController.navigate(SeriesDestination(it)) },
                     onOpenPremium = { navController.navigateToTab(TopLevelDestination.PREMIUM) },
+                    onOpenSettings = { navController.navigate(SettingsDestination) },
+                    onOpenManageSubscription = { navController.navigate(ManageSubscriptionDestination) },
                 )
+            }
+            composable<SettingsDestination> {
+                SettingsRoute(
+                    onBack = { navController.popBackStack() },
+                    onLoggedOut = {
+                        navController.navigate(LoginDestination) {
+                            // Clear everything, so Back from Login closes the app instead of reopening Settings.
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
+                )
+            }
+            composable<ManageSubscriptionDestination> {
+                ManageSubscriptionRoute(onBack = { navController.popBackStack() })
             }
             composable<SearchDestination> { PlaceholderScreen(stringResource(R.string.search)) }
             composable<SeriesDestination> { entry ->

@@ -1,5 +1,6 @@
 package com.cf.vidya.feature.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,10 +30,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.cf.vidya.R
 import com.cf.vidya.designsystem.theme.VidyaColors
 import com.cf.vidya.designsystem.theme.VidyaSpacing
 
@@ -123,29 +127,14 @@ private fun PosterCollage(modifier: Modifier = Modifier) {
     }
 }
 
-/** Placeholder for the Vidya app icon until the designer shares the SVG. */
+/** The Vidya app icon above the login form. */
 @Composable
 private fun VidyaAppIcon(modifier: Modifier = Modifier) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-            .size(76.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(VidyaColors.LogoGradient),
-    ) {
-        Text(
-            text = "V",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = VidyaColors.Gold,
-        )
-        Text(
-            text = "VIDYA",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.5.sp,
-            color = Color.White,
-        )
-    }
+    Image(
+        painter = painterResource(R.drawable.vidya_app_icon),
+        contentDescription = stringResource(R.string.app_name),
+        // The PNG already has its own rounded corners, so show all of it.
+        contentScale = ContentScale.Fit,
+        modifier = modifier.size(76.dp),
+    )
 }

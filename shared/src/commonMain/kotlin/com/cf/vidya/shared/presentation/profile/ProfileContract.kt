@@ -12,6 +12,7 @@ data class ProfileState(
 sealed interface ProfileEvent {
     data object RetryClicked : ProfileEvent
     data object BackClicked : ProfileEvent
+    data object SettingsClicked : ProfileEvent
     data object CopyIdClicked : ProfileEvent
     data object ManageSubscriptionClicked : ProfileEvent
     data object GetPremiumClicked : ProfileEvent
@@ -20,6 +21,7 @@ sealed interface ProfileEvent {
 
 sealed interface ProfileEffect {
     data object GoBack : ProfileEffect
+    data object OpenSettings : ProfileEffect
     data class CopyToClipboard(val text: String) : ProfileEffect
     data object OpenManageSubscription : ProfileEffect
     data object OpenPremium : ProfileEffect

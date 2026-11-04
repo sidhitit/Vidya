@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cf.vidya.R
+import com.cf.vidya.designsystem.components.BackTopBar
 import com.cf.vidya.designsystem.components.ErrorState
 import com.cf.vidya.designsystem.components.GoldButton
 import com.cf.vidya.designsystem.components.PosterCard
@@ -83,7 +84,19 @@ fun ProfileScreen(
             .background(VidyaColors.Background)
             .statusBarsPadding(),
     ) {
-        ProfileTopBar(onBack = { onEvent(ProfileEvent.BackClicked) })
+        BackTopBar(
+            title = stringResource(R.string.profile),
+            onBack = { onEvent(ProfileEvent.BackClicked) },
+            actions = {
+                IconButton(onClick = { onEvent(ProfileEvent.SettingsClicked) }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_settings),
+                        contentDescription = stringResource(R.string.settings),
+                        tint = VidyaColors.TextPrimary,
+                    )
+                }
+            },
+        )
 
         val error = state.error
         val overview = state.overview
@@ -95,29 +108,6 @@ fun ProfileScreen(
             )
             overview != null -> ProfileContent(overview = overview, onEvent = onEvent)
         }
-    }
-}
-
-@Composable
-private fun ProfileTopBar(onBack: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = VidyaSpacing.xs, vertical = VidyaSpacing.xs),
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_back),
-                contentDescription = stringResource(R.string.back),
-                tint = VidyaColors.TextPrimary,
-            )
-        }
-        Text(
-            text = stringResource(R.string.profile),
-            style = MaterialTheme.typography.titleLarge,
-            color = VidyaColors.TextPrimary,
-        )
     }
 }
 
